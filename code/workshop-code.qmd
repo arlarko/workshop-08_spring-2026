@@ -94,7 +94,8 @@ Data source: Valliere, Justin; Zhang, Jacqueline; Sharifi, M.; Rundel, Philip (2
 drought_exp_clean <- drought_exp |>
   # remove spaces (make underscore) make undercase
   clean_names() |>
-  # expand code names to full species names, creating new colum called species_name
+  # expand code names to full species names, creating new colum called
+  #  species_name
   mutate(species_name = case_match(
     species,
     "ENCCAL" ~ "Encelia californica", # bush sunflower
@@ -206,7 +207,8 @@ ggplot(data = drought_exp_clean,
   #relabel axes, make title
   labs(x = "Treatment",
        y = "Total mass (g)",
-       title = "On average, well watered plants have higher mass\nthan drought stressed plants")+
+       title = "On average, well watered plants have higher mass\nthan
+       drought stressed plants")+
   #remove leg
   theme(legend.position = "none",
         plot.title.position = "plot")
@@ -230,6 +232,8 @@ Bonus: order the x-axis by decreasing mean plant mass.
 
 ```{r}
 #| label: jitter-species
+#| fig-height: 6
+#| fig-width: 8
 
 #base plot
 ggplot(data = drought_exp_clean,
@@ -302,7 +306,7 @@ model3 <- lm(
 
 # model 4: water treatment and species
 model4 <- lm(
-  total_g ~ water_treatment + species_name, #formula: only water treatment and species
+  total_g ~ water_treatment + species_name, #formula:water treatment & species
   data = drought_exp_clean
 )
 
@@ -325,7 +329,10 @@ model7 <- lm(
 )
 
 
-# function dredge fits model automatically, no thinking, doesnt help with model selection, dont know why each one would exist, doesnt consider biological interaction, not to use in this class (package may be newman)
+# function dredge fits model automatically, no thinking, doesnt help with model
+# selection, dont know why each one would exist, doesnt consider
+#  biological interaction, not to use in this class 
+#  (package may be newman)
 ```
 
 ## Model diagnostics
@@ -333,6 +340,8 @@ model7 <- lm(
 
 ```{r}
 #| label: check diog
+#| fig-height: 6
+#| fig-width: 6
 
 par(mfrow = c(2,2))
 plot(model4)
@@ -352,7 +361,9 @@ Arrange by decreasing AIC.
 
 ```{r}
 #| label: calculating AIC 
-# gives measure of a model that takes into factors in model and weights against complexity (# of factors in model), trying to get the model that best describes the differences
+# gives measure of a model that takes into factors in model and weights
+#against complexity (# of factors in model), trying to get the model that
+#best describes the differences
 
 #calc AIC
 AICc(
@@ -412,7 +423,7 @@ Rename the `x` column and `group` column to match the original data frame (`drou
 Look at the object before plotting.
 
 ```{r}
-#| label: 
+#| label: prediction-df
 
 preds <- ggpredict(model4,
                      terms = c("water_treatment", "species_name")) |>
@@ -427,6 +438,8 @@ Create a clean, publication ready figure depicting predictions for the best mode
 
 ```{r}
 #| label: final-figure
+#| fig-height: 10
+#| fig-width: 8
 
 ggplot(data = drought_exp_clean,
        mapping = aes(x = water_treatment,
