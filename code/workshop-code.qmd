@@ -90,11 +90,11 @@ Data source: Valliere, Justin; Zhang, Jacqueline; Sharifi, M.; Rundel, Philip (2
 ```{r}
 #| label: data cleaning
 
-# 
+# creating new object for clean data
 drought_exp_clean <- drought_exp |>
-  # 
+  # remove spaces (make underscore) make undercase
   clean_names() |>
-  # 
+  # expand code names to full species names, creating new colum called species_name
   mutate(species_name = case_match(
     species,
     "ENCCAL" ~ "Encelia californica", # bush sunflower
@@ -105,13 +105,13 @@ drought_exp_clean <- drought_exp |>
     "STIPUL" ~ "Stipa pulchra", # purple needlegrass
     "LOTSCO" ~ "Lotus scoparius" # deerweed
   )) |>
-  # 
+  # expand code names to full treatment name, making new column 
   mutate(water_treatment = case_match(
     water,
     "WW" ~ "Well watered",
     "DS" ~ "Drought stressed"
   ))  |>
-  # 
+  # changing order of each scientific name and species level 
   mutate(species_name = as_factor(species_name),
          species_name = fct_relevel(species_name,
                                     "Lotus scoparius",
@@ -324,13 +324,24 @@ model7 <- lm(
   data = drought_exp_clean
 )
 
+
+# function dredge fits model automatically, no thinking, doesnt help with model selection, dont know why each one would exist, doesnt consider biological interaction, not to use in this class (package may be newman)
 ```
 
 ## Model diagnostics
 
 
+```{r}
+#| label: check diog
 
+par(mfrow = c(2,2))
+plot(model4)
 
+```
+
+- residuals appear normally distributed
+- residuals appear homoscedastic (have constant variance)
+- no clear outliers in data set influencing
 
 
 ## Model selection
@@ -339,28 +350,58 @@ Insert code to use the `AICc()` function to calculate the AIC for each model.
 
 Arrange by decreasing AIC.
 
+```{r}
+#| label: calculating AIC 
+# gives measure of a model that takes into factors in model and weights against complexity (# of factors in model), trying to get the model that best describes the differences
+
+#calc AIC
+AICc(
+  model0,
+  model1,
+  model2,
+  model3,
+  model4,
+  model5,
+  model6,
+  model7
+) |>
+  #arrange order of aic
+  arrange(AICc)
+
+#model 4 best model, only includes species and treatment 
+```
 
 
 
 Insert code to display the summary for the best model. 
 
 
+```{r}
+#| label: model-summary
 
+summary(model4)
 
+```
+
+- `(intercept)`: model prediction for plant mass for Lotus scoparius in the drought stressed treatment (lotus reference level for species and drought reference level for water treatment, dont show up in r output, how you know which the reference are)
+- `water_treatmentWell Watered` : model prediction for the difference in lotus scoparious mass between the well watered and drought stressed treatment
+- `species_namePenstemon centranthifolius` : model prediction for difference between penstemon mass in the well watered treatment and Lotus mass in well watered treatment
+- `species_nameEschscholzia californica`: model prediction for the difference between Escholtiza in the well watered treatment and lotus mass in well watered treatment 
 
 ## Stop and think: what does this model mean?  
 
 **What is the best model?**
 
-[insert your response here]
+the best model includes water treatement and species as predictors
 
 **How much variation in the response (total mass, in grams) does this model explain?**
 
-[insert your response here]
+72.6% (from Adjusted R-squared:  0.7257) of the variation in plant mass is explained by a model with both of these predictors.
 
 **How do we interpret the effects of the predictors on the response variable (again, total mass in grams)?**
 
-[insert your response here]
+- treatment influences plant mass
+- species influences plant mass
 
 # 4. Model predictions
 
@@ -370,11 +411,47 @@ Rename the `x` column and `group` column to match the original data frame (`drou
 
 Look at the object before plotting.
 
+```{r}
+#| label: 
+
+preds <- ggpredict(model4,
+                     terms = c("water_treatment", "species_name")) |>
+  rename(water_treatment = x,
+         species_name = group) #rename column to fit original data frame 
+```
 
 
 # 5. Final figure
 
 Create a clean, publication ready figure depicting predictions for the best model and the underlying data.
+
+```{r}
+#| label: final-figure
+
+ggplot(data = drought_exp_clean,
+       mapping = aes(x = water_treatment,
+                     y = total_g,
+                     color=water_treatment))+
+  geom_jitter(height = 0,
+              width = 0.1,
+              alpha = 0.4,
+              shape = 21)+
+geom_pointrange(data = preds,
+                mapping = aes(x = water_treatment,
+                              y = predicted,
+                              ymin = conf.low,
+                              ymax = conf.high)) +
+  facet_wrap(~species_name,
+             nrow = 3)+
+  scale_color_manual(values = c(
+    "Drought stressed" = ds_col,
+    "Well watered" = ww_col
+  ))+
+  theme(legend.position = "none")+
+  labs( x = "Treatment",
+        y = "Total plant mass (g)
+        ")
+```
 
 
 # 6. Writing
