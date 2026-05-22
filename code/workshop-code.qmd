@@ -256,9 +256,6 @@ ggplot(data = drought_exp_clean,
 
 
 
-
-
-
 # 4. Fitting models
 
 8 models total:
@@ -280,27 +277,52 @@ ggplot(data = drought_exp_clean,
 #| label: model fitting
 
 # model 0: null model
-
+model0 <-lm(
+  total_g~1, #formula no predictors
+  data = drought_exp_clean # clean data frame
+)
 
 # model 1: all predictors
-
+model1 <- lm(
+  total_g ~ sla + water_treatment + species_name, #formula: all predictors
+  data = drought_exp_clean
+)
 
 # model 2: SLA and water treatment
-
+model2 <- lm(
+  total_g ~ sla + water_treatment, #formula: only sla and treatment
+  data = drought_exp_clean
+)
 
 # model 3: SLA and species
-
+model3 <- lm(
+  total_g ~ sla +  species_name, #formula: only sla and species
+  data = drought_exp_clean
+)
 
 # model 4: water treatment and species
-
+model4 <- lm(
+  total_g ~ water_treatment + species_name, #formula: only water treatment and species
+  data = drought_exp_clean
+)
 
 # model 5: SLA
-
+model5 <- lm(
+  total_g ~ sla, #formula: only sla
+  data = drought_exp_clean
+)
 
 # model 6: water treatment
-
+model6 <- lm(
+  total_g ~  water_treatment, #formula: only water treat
+  data = drought_exp_clean
+)
 
 # model 7: species
+model7 <- lm(
+  total_g ~ species_name, #formula: only species
+  data = drought_exp_clean
+)
 
 ```
 
